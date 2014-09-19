@@ -222,6 +222,7 @@ class change_options(ProtectedPage):
             gv.srvals = gv.srvals[:newlen]
             gv.ps = gv.ps[:newlen]
             gv.rs = gv.rs[:newlen]
+            gv.snames = gv.snames[:newlen]
             gv.sbits = gv.sbits[:onbrd + 1]
         return
 

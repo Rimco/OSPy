@@ -10,8 +10,8 @@ import web  # the Web.py module. See webpy.org (Enables the Python OpenSprinkler
 import gv
 
 from helpers import plugin_adjustment, prog_match, schedule_stations, log_run, stop_onrain, check_rain, jsave, station_names
-from gpio_pins import set_output  # provides access to GPIO pins
 from urls import urls  # Provides access to URLs for UI pages
+from gpio_pins import set_output
 
 
 def timing_loop():
@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
     gv.plugin_menu.sort(key=lambda entry: entry[0])
 
-    set_output()
+#    set_output()
     thread.start_new_thread(timing_loop, ())
 
     app.notfound = lambda: web.seeother('/')

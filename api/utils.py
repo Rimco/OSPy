@@ -56,7 +56,7 @@ def does_json(func):
     """
 
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(*args, **kwargs):
         # Set headers
         web.header('Cache-Control', 'no-cache')
         web.header('Content-Type', 'application/json')
@@ -64,7 +64,7 @@ def does_json(func):
 
         # This calls the decorated method
         try:
-            r = func(self, *args, **kwargs)
+            r = func(*args, **kwargs)
             if r:
                 # Take care of JSONP
                 params = web.input(callback=None)
@@ -102,7 +102,7 @@ def auth(func):
     """
 
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(*args, **kwargs):
         if not options.no_password:
             username = password = ''
             try:
@@ -122,7 +122,7 @@ def auth(func):
                 web.header('WWW-Authenticate', 'Basic realm="OSPy"')
                 raise unauthorized()
 
-        return func(self, *args, **kwargs)
+        return func(*args, **kwargs)
     return wrapper
 
 

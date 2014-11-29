@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 __author__ = 'Rimco'
 
 # System imports
-from threading import Thread
 import datetime
 import logging
 import os
@@ -11,11 +11,13 @@ import random
 import subprocess
 import time
 import errno
+from threading import Thread
+from collections import namedtuple
 
 # Local imports
+import web
 from web import form
 from web.session import sha1
-import web
 
 
 def determine_platform():
@@ -99,6 +101,44 @@ def get_ip():
         return ipaddr
     except Exception:
         return "IP unavailable"
+
+
+def get_mac():
+    """Retrun MAC from file"""
+    try:
+        myMAC = open('/sys/class/net/eth0/address').read()
+        return str(myMAC)
+    except:
+        return str('none')
+
+
+def get_meminfo():
+    """Return the information in /proc/meminfo as a dictionary"""
+    try:
+        meminfo = {}
+        with open('/proc/meminfo') as f:
+            for line in f:
+                meminfo[line.split(':')[0]] = line.split(':')[1].strip()
+        return meminfo
+    except:
+        return None
+
+
+def get_netdevs():
+    """RX and TX bytes for each of the network devices"""
+    try:
+        with open('/proc/net/dev') as f:
+            net_dump = f.readlines()
+        device_data = {}
+        data = namedtuple('data', ['rx', 'tx'])
+        for line in net_dump[2:]:
+            line = line.split(':')
+            if line[0].strip() != 'lo':
+                device_data[line[0].strip()] = data(float(line[1].split()[0])/(1024.0*1024.0),
+                                                    float(line[1].split()[8])/(1024.0*1024.0))
+        return device_data
+    except:
+        return None
 
 
 def get_cpu_temp(unit=None):

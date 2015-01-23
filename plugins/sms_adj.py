@@ -20,6 +20,8 @@ from webpages import ProtectedPage
 from helpers import reboot, poweroff
 from programs import programs
 from stations import stations
+import os
+import subprocess
 
 
 NAME = 'SMS Modem'
@@ -51,7 +53,7 @@ email_options = PluginOptions(
 )
 
 # Plugin system will catch the following error and disable the plugin automatically:
-import gammu  # for SMS modem import gammu
+# import gammu  # for SMS modem import gammu
 # if no install modem and gammu visit: http://www.pihrt.com/elektronika/259-moje-rapsberry-pi-sms-ovladani-rpi
 # USB modem HUAWEI E303 + SIM card with telephone provider
 
@@ -93,6 +95,32 @@ class SMSSender(Thread):
                        log.info(NAME, 'SMS Modem plug-in is enabled')
                        once_text = True
                        two_text = False
+                       if not os.path.exists("/usr/bin/gammu"): 
+                           #http://askubuntu.com/questions/448358/automating-apt-get-install-with-assume-yes
+                           #sudo apt-get install -y gammu
+                           #sudo apt-get install -y python-gammu
+                           log.clear(NAME)
+                           log.info(NAME, 'Gammu is not installed.')
+                           log.info(NAME, 'Please wait installing Gammu...')
+                           cmd = "sudo apt-get install -y gammu"
+                           proc_install(self, cmd)
+                           log.info(NAME, 'Please wait installing Python-Gammu...')
+                           cmd = "sudo apt-get install -y python-gammu"
+                           proc_install(self, cmd)
+                           log.info(NAME, 'Testing attached GSM ttyUSB...')
+                           cmd = "sudo dmesg | grep tty"
+                           proc_install(self, cmd)
+                       if not os.path.exists("/root/.gammurc"):
+                           log.info(NAME, 'Saving Gammu config to /root/.gammurc...')
+                           f = open("/root/.gammurc","w") 
+                           f.write("[gammu]\n") 
+                           f.write("port = /dev/ttyUSB0\n") 
+                           f.write("model = \n") 
+                           f.write("connection = at19200\n") 
+                           f.write("synchronizetime = yes\n") 
+                           f.write("logfile =\n") 
+                           f.close()
+  
                     sms_check(self)  # Check SMS command from modem
 
                 else:
@@ -127,8 +155,26 @@ def stop():
         sms_sender.join()
         sms_sender = None
 
+def proc_install(self, cmd):
+   """installation"""
+   proc = subprocess.Popen(
+        cmd,
+        stderr=subprocess.STDOUT,  # merge stdout and stderr
+        stdout=subprocess.PIPE,
+        shell=True)
+   output = proc.communicate()[0]
+   log.info(NAME, output)
+
+
 def sms_check(self):
     """Control and processing SMS"""
+    try:
+       import gammu 
+    except Exception:
+       err_string = ''.join(traceback.format_exc())
+       log.error(NAME, 'SMS Modem plug-in:\n' + err_string)
+       sms_options["use_sms"] = False
+
     tel1 = sms_options['tel1']
     tel2 = sms_options['tel2']
     comm1 = sms_options['txt1']

@@ -22,6 +22,7 @@ options = PluginOptions(
     NAME,
     {'enabled': False,
      'pulses': 10.0,
+     'address': False, # True = 0x51, False = 0x50 for PCF8583
      'sum': 0
     }
 )
@@ -38,6 +39,7 @@ class WaterSender(Thread):
         self._stop = Event()
 
         self.bus = None
+        self.pcf = None
         self.status = {}
         self.status['meter'] = 0.0
 
@@ -59,13 +61,12 @@ class WaterSender(Thread):
     def run(self):
         try:
             import smbus  # for PCF 8583
-
             self.bus = smbus.SMBus(1 if get_rpi_revision() >= 2 else 0)
         except ImportError:
             log.warning(NAME, 'Could not import smbus.')
 
-        pcf_ok = False
-        counter(self.bus) # test pcf8583 exist? -> pcf_ok = True
+        if self.bus is not None:
+            self.pcf = set_counter(self.bus)     # set pcf8583 as counter
 
         log.clear(NAME)
         once_text = True  # text enabled plugin
@@ -89,18 +90,17 @@ class WaterSender(Thread):
                     if once_text:
                         log.clear(NAME)
                         log.info(NAME, 'Water Meter plug-in is enabled.')
-
-                        if not pcf_ok:
-                            log.warning(NAME, 'Could not find PCF8583 on 0x50 I2C bus.')
+                        once_text = False
+                        two_text = True
+                        if self.pcf is None:
+                            log.warning(NAME, 'Could not find PCF8583.')
                         else:
                             log.info(NAME, 'Please wait for min/hour data...')
                             log.info(NAME, '________________________________')
                             log.info(NAME, 'Water in liters')
-                            log.info(NAME, 'Saved water summary:     ' + str(sum_water))
-                        once_text = False
-                        two_text = True
+                            log.info(NAME, 'Saved water summary: ' + str(sum_water))
 
-                    if pcf_ok:
+                    if self.pcf is not None:
                         sum_water = sum_water + val
                         minute_water = minute_water + val
                         hour_water = hour_water + val
@@ -157,19 +157,36 @@ def stop():
         water_sender.join()
         water_sender = None
 
-
-def counter(bus): # reset PCF8583, measure pulses and return number pulses per second
+def set_counter(i2cbus):
     try:
+        if options['address']:
+            pcf_addr = 0x51
+        else:
+            pcf_addr = 0x50 
+        i2cbus.write_byte_data(pcf_addr, 0x00, 0x20) # status registr setup to "EVENT COUNTER"
+        i2cbus.write_byte_data(pcf_addr, 0x01, 0x00) # reset LSB
+        i2cbus.write_byte_data(pcf_addr, 0x02, 0x00) # reset midle Byte
+        i2cbus.write_byte_data(pcf_addr, 0x03, 0x00) # reset MSB
+        log.info(NAME, 'Setup PCF8583 as event counter is OK')
+        return 1  
+    except:
+        log.error(NAME, 'Water Meter plug-in:\n' + 'Setup PCF8583 as event counter - FAULT')
+        return None
+
+
+def counter(i2cbus): # reset PCF8583, measure pulses and return number pulses per second
+    try:
+        if options['address']:
+            pcf_addr = 0x51
+        else:
+            pcf_addr = 0x50 
         # reset PCF8583
-        bus.write_byte_data(0x50, 0x00, 0x20) # status registr setup to "EVENT COUNTER"
-        bus.write_byte_data(0x50, 0x01, 0x00) # reset LSB
-        bus.write_byte_data(0x50, 0x02, 0x00) # reset midle Byte
-        bus.write_byte_data(0x50, 0x03, 0x00) # reset MSB
-
+        i2cbus.write_byte_data(pcf_addr, 0x01, 0x00) # reset LSB
+        i2cbus.write_byte_data(pcf_addr, 0x02, 0x00) # reset midle Byte
+        i2cbus.write_byte_data(pcf_addr, 0x03, 0x00) # reset MSB
         time.sleep(1)
-
         # read number (pulses in counter) and translate to DEC
-        counter = bus.read_i2c_block_data(0x50, 0x00)
+        counter = i2cbus.read_i2c_block_data(pcf_addr, 0x00)
         num1 = (counter[1] & 0x0F)             # units
         num10 = (counter[1] & 0xF0) >> 4       # dozens
         num100 = (counter[2] & 0x0F)           # hundred
@@ -177,11 +194,8 @@ def counter(bus): # reset PCF8583, measure pulses and return number pulses per s
         num10000 = (counter[3] & 0x0F)         # tens of thousands
         num100000 = (counter[3] & 0xF0) >> 4   # hundreds of thousands
         pulses = (num100000 * 100000) + (num10000 * 10000) + (num1000 * 1000) + (num100 * 100) + (num10 * 10) + num1
-        pcf_ok = True
         return pulses
-
     except:
-        pcf_ok = False
         return 0
 
 ################################################################################

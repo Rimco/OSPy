@@ -24,12 +24,19 @@ $var page: plugins
     <div class="title">Water meter settings</div>
     <p>This plugin needs an enabled I2C bus and connected counter PCF8583 on I2C address 0x50.</p>
     <p>This plugin measures the amount of water flowing per sec, min, hour and the total amount of water.</p>
+    <p>Visit <a href="http://pihrt.com/elektronika/298-moje-raspberry-pi-plugin-prutokomer">Martin Pihrt's blog</a> for more information.</p><br>
     <form id="pluginForm" action="$plugins.plugin_url('water_meter.settings_page')" method="post">
         <table class="optionList">
             <tr>
                 <td style='text-transform: none;'>Use Water Meter:</td>
                 <td>
                     <input name='enabled' type='checkbox'${" checked" if plugin_options['enabled'] else ""}>   
+                </td>
+            </tr>
+            <tr>
+                <td style='text-transform: none;'>I2C address 0x50:</td>
+                <td>
+                    <input name='address' type='checkbox'${" checked" if plugin_options['address'] else ""}> (if checked 0x51)  
                 </td>
             </tr>
             <tr>

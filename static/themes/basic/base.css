@@ -324,6 +324,11 @@ button.danger {
     background-color: #7D1921;
 }
 
+button.help {
+    font-weight: 700;
+    background-color: #2E3959;
+}
+
 button.toggle.narrow {
     width: 140px;
 }

@@ -1,0 +1,76 @@
+$def with (plugin_options, events)
+
+$var title: Pulse output
+$var page: plugins
+
+<script>
+    // Initialize behaviors
+    jQuery(document).ready(function(){
+
+        jQuery("#cSubmit").click(function() {
+            jQuery("#pluginForm").submit();
+        });
+        jQuery("#cStop").click(function() {
+            jQuery("#pluginForm2").submit();
+        });
+        jQuery("button#cCancel").click(function(){
+            window.location="/";
+        });
+
+    });
+</script>
+
+
+<div id="plugin">
+    <div class="title">Pulse output</div>
+    <p>This plugin pulses a selected circuit with a 1 Hz signal with adjusted time. (For discover the location of a valve).</p>
+    <br>
+    <form id="pluginForm" action="$plugins.plugin_url('pulse.start_page')" method="post">
+        <table class="optionList">
+             <tr>
+                <td style='text-transform: none;'>Enable test:</td>
+                <td>
+                    <input name='use_plugin' type='checkbox'${" checked" if plugin_options['use_plugin'] else ""}>  
+                </td>
+            </tr>
+            <tr>
+                <td style='text-transform: none;'>Available Outputs:</td>
+                <td>
+                   $plugin_options['stations_count'] stations
+                </td> 
+            </tr>           
+            <tr>
+                <td style='text-transform: none;'>Select Output:</td>
+                <td>
+                    <select name="select_output">
+                    $code:
+                       output = ""
+                       for station in stations.get():
+                          sel = "" 
+                          output += "<option value='" + str(station.index) + "'" + sel + ">" + station.name + " (Output " + str(station.index+1) + ")</option>"
+                       output += "</select>\n"
+                    $:{output}   
+                </td>
+            </tr>
+            <tr>
+                <td style='text-transform: none;'>Time to test:</td>
+                <td>
+                    <input name='time_test' type='number' min="5" max="60" value='$plugin_options["time_test"]'> (min 5 max 60 seconds)
+                </td>
+            </tr>
+            <tr>
+                <td style='text-transform: none;'>Status:</td>
+                <td>
+                    <textarea style="font-family: monospace;" rows="7" cols="35" readonly>$'\n'.join(events)</textarea>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<form id="pluginForm2" action="$plugins.plugin_url('pulse.stop_page')" method="post">
+</form>
+<div id="controls">
+    <button id="cSubmit" class="submit"><b>Start test</b></button>
+    <button id="cStop" class="cancel danger"><b>Stop test</b></button>
+    <button id="cCancel" class="cancel danger">Cancel</button>
+</div>

@@ -183,8 +183,10 @@ def sms_check(self):
     try:
         sm.Init()
         #log.info(NAME, "Checking SMS...")
-    except:
-        log.debug(NAME, "Error: SMS Modem fault")
+    except Exception:
+        err_string = ''.join(traceback.format_exc())
+        log.error(NAME, 'SMS Modem plug-in:\n' + err_string)
+        return
 
     status = sm.GetSMSStatus()
     remain = status['SIMUsed'] + status['PhoneUsed'] + status['TemplatesUsed']

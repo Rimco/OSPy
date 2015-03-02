@@ -1,6 +1,7 @@
 # !/usr/bin/env python
 # this plugins enable or disable watchdog 
 
+
 from threading import Thread, Event
 import time
 import subprocess
@@ -76,6 +77,7 @@ class StatusChecker(Thread):
    
        
     def run(self):
+        log.clear(NAME)
         self._is_installed()
         self._is_started()
 
@@ -128,8 +130,8 @@ def run_process(cmd):
 class status_page(ProtectedPage):
     """Load an html page."""
 
-    def GET(self):
-        log.clear(NAME)  
+    def GET(self):  
+        log.clear(NAME)
         cmd = "sudo service watchdog status"
         run_process(cmd)
         return self.plugin_render.system_watchdog(checker.status, log.events(NAME))
@@ -139,6 +141,7 @@ class install_page(ProtectedPage):
     """Instalation watchdog page"""
 
     def GET(self):
+        log.clear(NAME)
         cmd = "sudo echo 'bcm2708_wdog' >> /etc/modules"
         run_process(cmd)
         cmd = "sudo modprobe bcm2708_wdog"
@@ -148,21 +151,19 @@ class install_page(ProtectedPage):
         cmd = "sudo chkconfig watchdog on"
         run_process(cmd)
         log.info(NAME, 'Saving config to /etc/watchdog.conf')
+
+        # http://linux.die.net/man/5/watchdog.conf
         f = open("/etc/watchdog.conf","w")
-        f.write("watchdog-device = /dev/watchdog\n")
+        f.write("interval = 10\n")
         f.write("max-load-1 = 24\n")
+        f.write("watchdog-device = /dev/watchdog\n")  
         f.write("realtime = yes\n")
         f.write("priority = 1\n")
-        f.write("log-dir = /home/pi/OSPy/plugins/system_watchdog/data/watchdoglog\n")
-        ip = helpers.get_ip()
-#        f.write("#ping = "+ str(ip) + ":" + str(options.web_port) + "\n") TODO check web server?
-#        f.write("#ping-count = 3\n")  
+        f.write("test-timeout = 0\n")  
         f.close()
-        log.info(NAME, 'watchdog-device = /dev/watchdog')
-        log.info(NAME, 'max-load-1 = 24')
-        log.info(NAME, 'realtime = yes')
-        log.info(NAME, 'priority = 1')
-        raise web.seeother(plugin_url(status_page), True)
+        restart(3)
+        return self.core_render.restarting(plugin_url(status_page))
+
 
 class stop_page(ProtectedPage):
     """Stop watchdog service page"""
@@ -171,8 +172,8 @@ class stop_page(ProtectedPage):
         log.clear(NAME)
         cmd = "sudo service watchdog stop"
         run_process(cmd)
-        #cmd = "sudo update-rc.d watchdog remove" TODO
-        #run_process(cmd)
+        cmd = "sudo update-rc.d watchdog remove" 
+        run_process(cmd)
         restart(3)
         return self.core_render.restarting(plugin_url(status_page))
       
@@ -182,10 +183,10 @@ class start_page(ProtectedPage):
 
     def GET(self):
         log.clear(NAME)
-        cmd = "sudo  service watchdog start"
+        cmd = "sudo chkconfig watchdog on" 
         run_process(cmd)
-        #cmd = "sudo update-rc.d watchdog default" TODO
-        #run_process(cmd)
+        cmd = "sudo /etc/init.d/watchdog start"
+        run_process(cmd)
         restart(3)
         return self.core_render.restarting(plugin_url(status_page))
 

@@ -21,18 +21,27 @@ sudo apt-get install watchdog chkconfig
 chkconfig watchdog on    
 sudo /etc/init.d/watchdog start  
 sudo nano /etc/watchdog.conf  
-Uncomment the line watchdog-device = /dev/watchdog  
-You might also want to uncomment max-load-1, or add something like "max-load-1 = 24" to reset your Pi if the load average exceeds 24 in any 1-minute span.  
 sudo /etc/init.d/watchdog restart  
 
-Config file (/etc/watchdog.conf)  
+Options (/etc/watchdog.conf)  
 -----------  
+* interval = 10  
+Set the interval between two writes to the watchdog device. The kernel drivers expects a write command every minute. Otherwise the system will be rebooted. Default value is 10 seconds. An interval of more than a minute can only be used with the -f command-line option.  
 
-watchdog-device = /dev/watchdog  
-max-load-1 = 24  
-realtime = yes  
-priority = 1  
-log-dir = /home/pi/OSPy/plugins/system_watchdog/data/watchdoglog  
+* max-load-1 = 24  
+Set the maximal allowed load average for a 1 minute span. Once this load average is reached the system is rebooted. Default value is 0. That means the load average check is disabled. Be careful not to this parameter too low. To set a value less then the predefined minimal value of 2, you have to use the -f commandline option.  
+
+* watchdog-device = /dev/watchdog  
+Set the watchdog device name. Default is to disable keep alive support. 
+
+* realtime = yes  
+If set to yes watchdog will lock itself into memory so it is never swapped out.  
+
+* priority = 1  
+Set the schedule priority for realtime mode.  
+
+* test-timeout = 0  
+User defined tests may only run for <timeout> seconds. Set to 0 for unlimited (second). 
 
 Watchdog daemon  
 -----------  

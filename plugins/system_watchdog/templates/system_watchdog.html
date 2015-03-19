@@ -1,0 +1,57 @@
+$def with(stat, events)
+
+$var title: System Watchdog
+$var page: plugins
+<script>
+    // Initialize behaviors
+    jQuery(document).ready(function(){
+        jQuery("button#cRefresh").click(function(){
+            window.location="$plugins.plugin_url('system_watchdog.status_page')";
+        });
+        jQuery("button#cInstall").click(function(){
+            window.location="$plugins.plugin_url('system_watchdog.install_page')";
+        });
+        jQuery("button#cCancel").click(function(){
+            window.location="/";
+        });
+        jQuery("button#cStop").click(function(){
+            window.location="$plugins.plugin_url('system_watchdog.stop_page')";
+        });
+        jQuery("button#cStart").click(function(){
+            window.location="$plugins.plugin_url('system_watchdog.start_page')";
+        });
+
+
+    });
+</script>
+
+<div id="plugin">
+    <div class="title">System Watchdog</div>
+    <p>This plugin enable or disable Warchdog daemon in system.</p>
+    <p>Broadcom BCM2708 chip on the RPi has a hardware watchdog. This can be very useful if your RPi is located remotely and locks up. However, this would not the preferred method of restarting the unit and in extreme cases this can result in file-system damage that could prevent the RPi from booting. If this occurs regularly you better find the root cause of the problem rather than fight the symptoms.</p>
+    <p>The watchdog daemon will send /dev/watchdog a heartbeat every 10 seconds. If /dev/watchdog does not receive this signal it will brute-force restart your Raspberry Pi.</p>
+    <p>This plugin needs Watchdog. If not installed Watchdog, plugin installs Watchdog in to the system himself.
+    <form id="pluginForm">
+        <table class="optionList">
+            <tr>
+                <td style='text-transform: none;'>Status:</td>
+                <td>
+                    <textarea style="font-family: monospace;" rows="7" cols="50" readonly>$'\n'.join(events)</textarea><br/>
+                    $if stat['service_install']:  
+                        <button id="cRefresh" class="options" type="button">Refresh</button>
+                    $else:
+                        <button id="cInstall" class="cancel danger" type="button">Install Watchdog</button>
+                </td>
+            </tr>
+            
+        </table>
+    </form>
+</div>
+<div id="controls">
+    $if stat['service_install']:
+        $if stat['service_state']:
+           <button id="cStop" class="cancel danger"><b>Stop Watchdog Service</b></button>
+        $else:
+           <button id="cStart" class="options"><b>Start Watchdog Service</b></button>
+    <button id="cCancel" class="cancel danger">Back</button>
+</div>

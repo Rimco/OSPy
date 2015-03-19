@@ -182,10 +182,14 @@ def sms_check(self):
     sm.ReadConfig()
     try:
         sm.Init()
-        #log.info(NAME, "Checking SMS...")
-    except:
-        log.debug(NAME, "Error: SMS Modem fault")
+    except Exception:
+        err_string = ''.join(traceback.format_exc())
+        log.error(NAME, 'SMS Modem plug-in:\n' + err_string)
+        self._sleep(60)
 
+    signal = sm.GetSignalQuality() # list: SignalPercent, SignalStrength, BitErrorRate
+    log.info(NAME, time.strftime("%d.%m.%Y at %H:%M:%S", time.localtime(time.time())) + ' Signal: ' + str(signal['SignalPercent']) + '% ' + str(signal['SignalStrength']) + 'dB')
+    
     status = sm.GetSMSStatus()
     remain = status['SIMUsed'] + status['PhoneUsed'] + status['TemplatesUsed']
     sms = []

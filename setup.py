@@ -209,6 +209,16 @@ if __name__ == '__main__':
                             'https://bitbucket.org/birkenfeld/pygments-main/get/0fb2b54a6e10.zip', 'birkenfeld-pygments-main-0fb2b54a6e10',
                             [[sys.executable, 'setup.py', 'install']])
 
+            install_package('python-SMBus', None, 'python-SMBus',
+                             None, None, None, None, None
+                           )
+
+            install_package('i2c-tools', None, 'i2c-tools',
+                             None, None, None, None, None
+                           )
+
+
+
         install_service()
 
         check_password()

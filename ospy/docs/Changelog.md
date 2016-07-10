@@ -1,6 +1,40 @@
 OSPy Changelog
 ====
 
+July 5 2016
+----------
+(martinpihrt)<br/>
+Changes:<br/>
+1. Added languages support for all OSPy-temp-plugins (now Czech, English) without plugins: sms_adj, water_meter.<br>
+2. Added new button in options for delete options.db file (delete all user settings and restore default value.<br> 
+
+June 15 2016
+----------
+(martinpihrt)<br/>
+Changes:<br/>
+1. Added languages support for all OSPy-temp-plugins (now Czech, English) without plugins: air_temp_humi, button_control, sms_adj, volt_temp_da, water_meter, webcam.<br>
+
+June 9 2016
+----------
+(martinpihrt)<br/>
+Changes:<br/>
+1. Added languages support for all OSPy-core-plugins (now Czech, English) and for LCD plugin from OSPy-temp-plugins.<br>
+2. Changes OSPy font style in css and add buttons gap in plugins manager (Thanks janboreczech.)<br>
+
+June 7 2016
+----------
+(martinpihrt)<br/>
+Changes:<br/>
+1. Added languages in the Options and all pages i18n (Czech, English).<br/>
+2. Changes helpers.py, options.py, program.py, runonce.py, server.py, scheduler.py, version.py, webpages.py.<br/>
+3. Changes base.html, help.html, home.html, log.html, login.html, options.html, plugins_install.html, plugins_manage.html, programs.html, program.html, restarting.html, runonce.html, stations.html.<br/>
+4. Move to html code: static/scripts/basic.js, help.js, program.js, base.js.<br/>
+5. Change jquery on to 2.2.4.min.js.<br/>
+6. Added languages (Czech, English) in plugins/lcd_display.<br/>
+7. Added in the Options backup configuration (file.db) - upload and download configuration file.<br/>
+8. Fixed togle button on the home page for change temperature C/K.<br/>  
+
+
 September 10 2014
 ----------
 (martinpihrt)<br/>

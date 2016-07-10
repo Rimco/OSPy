@@ -6,10 +6,11 @@ import os
 import datetime
 import json
 import web
+import ast
 
 # Local imports
 from ospy.helpers import test_password, template_globals, check_login, save_to_options, \
-    password_hash, password_salt, get_input, get_help_files, get_help_file
+    password_hash, password_salt, get_input, get_help_files, get_help_file, restart, reboot, poweroff
 from ospy.inputs import inputs
 from ospy.log import log
 from ospy.options import options
@@ -20,15 +21,16 @@ from ospy.runonce import run_once
 from ospy.stations import stations
 from ospy import scheduler
 import plugins
+import i18n
 
 from web import form
 
 
 signin_form = form.Form(
-    form.Password('password', description='Password:'),
+    form.Password('password', description=_('Password:')),
     validators=[
         form.Validator(
-            "Incorrect password, please try again",
+            _('Incorrect password, please try again'),
             lambda x: test_password(x["password"])
         )
     ]
@@ -177,7 +179,7 @@ class action_page(ProtectedPage):
                     'active': True,
                     'program': -1,
                     'station': sid,
-                    'program_name': "Manual",
+                    'program_name': _('Manual'),
                     'fixed': True,
                     'cut_off': 0,
                     'manual': True,
@@ -332,6 +334,7 @@ class plugins_manage_page(ProtectedPage):
         enable = get_input(qdict, 'enable', None, lambda x: x == '1')
         disable_all = get_input(qdict, 'disable_all', False, lambda x: True)
         auto_update = get_input(qdict, 'auto', None, lambda x: x == '1')
+        use_update = get_input(qdict, 'use', None, lambda x: x == '1')
 
         if disable_all:
             options.enabled_plugins = []
@@ -359,6 +362,10 @@ class plugins_manage_page(ProtectedPage):
         if auto_update is not None:
             options.auto_plugin_update = auto_update
             raise web.seeother('/plugins_manage')
+        
+        if use_update is not None:
+            options.use_plugin_update = use_update
+            raise web.seeother('/plugins_manage')    
 
         return self.core_render.plugins_manage()
 
@@ -431,7 +438,20 @@ class options_page(ProtectedPage):
 
     def POST(self):
         qdict = web.input()
+  
+        change = False # if change language -> restart ospy
 
+        if 'lang' in qdict and qdict['lang']:
+            if options.lang != qdict['lang']:
+               change = True
+
+        newname = qdict['name'] # if name is asci char
+        try:
+           from ospy.helpers import ASCI_convert
+           qdict['name'] = ASCI_convert(newname)
+        except:
+           qdict['name'] = ' '
+            
         save_to_options(qdict)
 
         if 'master' in qdict:
@@ -455,6 +475,34 @@ class options_page(ProtectedPage):
                     raise web.seeother('/options?errorCode=pw_wrong')
             except KeyError:
                 pass
+   
+        if 'rbt' in qdict and qdict['rbt'] == '1':
+            reboot(True) # Linux HW software 
+            return self.core_render.home()
+
+        if 'rstrt' in qdict and qdict['rstrt'] == '1':
+            restart()    # OSPy software
+            return self.core_render.restarting(home_page)
+        
+        if 'pwrdwn' in qdict and qdict['pwrdwn'] == '1':
+            poweroff()   # shutdown HW system
+            return self.core_render.restarting(home_page) 
+
+        if 'deldef' in qdict and qdict['deldef'] == '1':
+            OPTIONS_FILE = './ospy/data'
+            try:
+                import shutil, time
+                shutil.rmtree(OPTIONS_FILE) # delete data folder
+                time.sleep(2)
+                os.makedirs(OPTIONS_FILE)   # create data folder
+                restart()                   # restart OSPy software
+                return self.core_render.restarting(home_page)
+            except:
+                pass 
+
+        if change:
+            restart()    # OSPy software
+            return self.core_render.restarting(home_page)
 
         raise web.seeother('/')
 
@@ -491,7 +539,56 @@ class help_page(ProtectedPage):
         docs = get_help_files()
         return self.core_render.help(docs)
 
+class download_page(ProtectedPage):
+    """Download OSPy DB file with settings"""
+    def GET(self):
+       OPTIONS_FILE = './ospy/data/options.db'
 
+       def _read_log():
+          """Read OSPy DB file"""
+          try:                
+             logf = open(OPTIONS_FILE,'r')
+             return logf.read()
+          except IOError:
+             return []
+
+       try:
+          import mimetypes
+         
+          download_name = 'options.db'
+          content = mimetypes.guess_type(OPTIONS_FILE)[0]
+          web.header('Content-type', content)
+          web.header('Content-Length', os.path.getsize(OPTIONS_FILE))    
+          web.header('Content-Disposition', 'attachment; filename=%s'%download_name)
+          return _read_log()
+          raise web.seeother('/')
+
+       except Exception:
+          return self.core_render.home()
+
+
+class upload_page(ProtectedPage):
+    """Upload OSPy DB file with settings"""
+    
+    def GET(self):
+        raise web.seeother('/')
+
+    def POST(self):
+        OPTIONS_FILE = './ospy/data/options.db'
+        i = web.input(uploadfile={})
+        try:
+            if i.uploadfile.filename == 'options.db':
+               fout = open(OPTIONS_FILE,'w') 
+               fout.write(i.uploadfile.file.read()) 
+               fout.close() 
+               log.debug('webpages.py', 'Uploading and saving options.db file sucesfully, now restarting OSPy...')
+               restart(3)
+               return self.core_render.restarting(home_page)
+            self._redirect_back()
+
+        except Exception:
+            self._redirect_back()
+        
 ################################################################################
 # APIs                                                                         #
 ################################################################################

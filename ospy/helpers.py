@@ -9,6 +9,7 @@ import logging
 import random
 import time
 import errno
+import re
 from threading import Lock
 
 BRUTEFORCE_LOCK = Lock()
@@ -292,17 +293,19 @@ def minute_time_str(minute_time, with_seconds=False):
 
 
 def short_day(index):
-    return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index]
+    import i18n
+    return [_('Mon'), _('Tue'), _('Wed'), _('Thu'), _('Fri'), _('Sat'), _('Sun')][index]
 
 
 def long_day(index):
-    return ["Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"][index]
+    import i18n
+    return [_('Monday'),
+            _('Tuesday'),
+            _('Wednesday'),
+            _('Thursday'),
+            _('Friday'),
+            _('Saturday'),
+            _('Sunday')][index]
 
 
 def stop_onrain():
@@ -417,6 +420,7 @@ def get_input(qdict, key, default=None, cast=None):
 
 
 def template_globals():
+    import i18n
     import json
     import plugins
     import urllib
@@ -439,7 +443,8 @@ def template_globals():
         'isinstance': isinstance,
         'sorted': sorted,
         'hasattr': hasattr,
-
+        '_': _,
+        'i18n': i18n,
         'now': now
     }
 
@@ -512,4 +517,11 @@ def get_help_file(id):
                     return web.template.Template(converted, globals=template_globals())()
     except Exception:
         pass
-    return ''
+    return '' 
+
+def ASCI_convert(name):
+  if name == None:
+     return None
+  name = re.sub(r"[^A-Za-z0-9_+-.:?!/ ]+", ' ', name)
+  return name
+  

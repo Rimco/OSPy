@@ -48,26 +48,10 @@ class _Options(object):
             "category": "System"
         },
         {
-            "key": "elevation",
-            "name": "Elevation (m)",
-            "default": 0,
-            "help": "Elevation of this location in meters.",
-            "category": "System",
-            "min": 0,
-            "max": 10000
-        },
-        {
-            "key": "wunderground_key",
-            "name": "Wunderground API key",
+            "key": "stormglass_key",
+            "name": "Storm Glass API key",
             "default": "",
-            "help": "To make use of local weather conditions, a weather underground API key is needed.",
-            # "category": "System": API no longer available
-        },
-        {
-            "key": "darksky_key",
-            "name": "Dark Sky API key",
-            "default": "",
-            "help": "To make use of local weather conditions, a Dark Sky API key is needed.",
+            "help": "To make use of local weather conditions, a Storm Glass API key is needed.",
             "category": "System"
         },
         {

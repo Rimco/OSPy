@@ -45,4 +45,4 @@ The program makes use of cmarkgfm (https://github.com/theacodes/cmarkgfm) to ren
 
 The program makes use of OpenStreetMap (https://www.openstreetmap.org) to convert locations into coordinates.
 
-The program makes use of Dark Sky API ([Powered by Dark Sky](https://darksky.net/poweredby/)) for weather information.
+The program makes use of Storm Glass API ([stormglass.io](https://stormglass.io/)) for weather information.

@@ -50,6 +50,10 @@ def two_digits(n):
     return '%02d' % int(n)
 
 
+def avg(lst):
+    return sum(lst) / len(lst)
+
+
 def program_delay(program):
     today = datetime.datetime.combine(datetime.date.today(), datetime.time.min)
     result = (program.start - today).total_seconds()

@@ -226,6 +226,9 @@ if __name__ == '__main__':
                                 [[sys.executable, 'setup.py', 'install']],
                                 'https://github.com/Zopieux/cmarkgfm/archive/master.zip', 'cmarkgfm-master',
                                 [[sys.executable, 'setup.py', 'install']])
+                if sys.platform.startswith('linux'):
+                    install_package('smbus', None, 'python3-smbus', 'smbus',
+                                    None, None, None, None, None)
 
         install_service()
 

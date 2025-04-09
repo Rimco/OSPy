@@ -180,6 +180,32 @@ class _Options(object):
         },
 
         #######################################################################
+        # Pressure Sensor #####################################################
+        {
+            "key": "pressure_sensor_analog",
+            "name": "Use analog pressure sensor",
+            "default": False,
+            "help": "Use an analog pressure sensor connected to PCF8591 via I2C.",
+            "category": "Pressure Sensor"
+        },
+        {
+            "key": "pressure_sensor_analog_channel",
+            "name": "Analog channel",
+            "default": 1,
+            "help": "The PCF8591 channel to which the pressure sensor is connected.",
+            "category": "Pressure Sensor",
+            "min": 0,
+            "max": 3
+        },
+        {
+            "key": "pressure_sensor_analog_conversion",
+            "name": "Voltage conversion",
+            "default": "(v - 0.5) * 3.0",
+            "help": "The formula to use to convert the analog voltage (v) into bar.",
+            "category": "Pressure Sensor"
+        },
+
+        #######################################################################
         # Logging #############################################################
         {
             "key": "run_log",

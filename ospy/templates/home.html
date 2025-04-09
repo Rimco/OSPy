@@ -116,7 +116,7 @@ $else:
                     <td class='station_name'>${station.name}</td>
                     <td id='status${station.index}' class="stationStatus">loading...</td>
                     $for tick in range(0,24):
-                        <td class="scheduleTick" data="$tick"></td>
+                        <td class="scheduleTick" data="${tick}"></td>
                 </tr>
             <tr>
                 <td colspan="2">

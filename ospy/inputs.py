@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Rimco'
 
+import logging
 
 class _RainSensorMixIn(object):
     def rain_sensed(self):
@@ -13,6 +14,9 @@ class _DummyInputs(_RainSensorMixIn):
     def __init__(self):
         self.rain_input = False
 
+    def get_water_pressure(self):
+        from math import nan
+        return nan
 
 class _IOInputs(_RainSensorMixIn):
     def __init__(self):
@@ -44,6 +48,29 @@ class _RPiInputs(_IOInputs, _RainSensorMixIn):
             'rain_input': 8
         }
 
+        self._smbus = None
+
+    def _channel_change(self, key, old, new):
+        self._smbus.write_byte(0x48, new)
+
+    def get_water_pressure(self):
+        from ospy.options import options
+        from math import nan
+        if options.pressure_sensor_analog:
+            try:
+                if self._smbus is None:
+                    from smbus import SMBus
+                    self._smbus = SMBus(1)
+                    options.add_callback('pressure_sensor_analog_channel', self._channel_change)
+                    self._smbus.write_byte(0x48, options.pressure_sensor_analog_channel)
+
+                v = self._smbus.read_byte(0x48)*3.3/255
+                return round(max(0.0, eval(options.pressure_sensor_analog_conversion)), 1)
+            except Exception as err:
+                logging.debug(err)
+                return nan
+        else:
+            return nan
 
 class _BBBInputs(_IOInputs, _RainSensorMixIn):
     def __init__(self):
@@ -57,6 +84,9 @@ class _BBBInputs(_IOInputs, _RainSensorMixIn):
             'rain_input': "P9_15"
         }
 
+    def get_water_pressure(self):
+        from math import nan
+        return nan
 
 try:
     inputs = _RPiInputs()

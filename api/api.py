@@ -8,6 +8,7 @@ from ospy.stations import stations
 from ospy.options import options, level_adjustments
 from ospy.programs import programs, ProgramType
 from ospy.log import log
+from ospy.inputs import inputs
 from ospy import helpers
 
 
@@ -336,7 +337,8 @@ class System(object):
             'uptime': helpers.uptime(),
             'platform': helpers.determine_platform(),
             'rpi_revision': helpers.get_rpi_revision(),
-            'total_adjustment': level_adjustments.total_adjustment()
+            'total_adjustment': level_adjustments.total_adjustment(),
+            'water_pressure': inputs.get_water_pressure()
         }
 
     @auth

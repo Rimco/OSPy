@@ -144,6 +144,15 @@ function statusTimer() {
     jQuery.getJSON("/status.json", updateStatus)
 }
 
+function updateSystem(status) {
+    jQuery("td#water_pressure").text(status["water_pressure"].toFixed(1) + " bar")
+    setTimeout(systemTimer, 1000);
+}
+
+function systemTimer() {
+    jQuery.getJSON("/api/system", updateSystem)
+}
+
 function water_level_prompt(current){
     if (current != 1.0) {
         var w = 100;
@@ -302,6 +311,7 @@ function create_graph(result) {
 }
 
 jQuery(document).ready(function(){
+    setTimeout(systemTimer, 1000);
     if (manual_mode) {
         jQuery("button.manual").click(function () {
             sid = parseInt(jQuery(this).attr("id"));

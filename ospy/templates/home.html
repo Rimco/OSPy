@@ -25,25 +25,28 @@ $var page: home
     <br>&nbsp;
 </div>
 <div style="display: inline-block; box-sizing: border-box; vertical-align: top;">
-    $if len([v for v in level_adjustments.values() if abs(v-1) > 0.001]) > 0:
-        <b>Water Level adjustments</b>
-        <table class="adjustmentList">
+    <table class="adjustmentList">
+        <tr><td><b>Water Pressure:</b></td><td id="water_pressure">$("%.1f bar" % inputs.get_water_pressure())</td></tr>
+        <tr><td></td></tr>
+
+        $if len([v for v in level_adjustments.values() if abs(v-1) > 0.001]) > 0:
+            <tr><td><b>Water Level adjustments</b></td></tr>
             $if abs(options.level_adjustment-1) > 0.001:
                 <tr>
                     <td>User</td>
-                    <td class="adjValue">$(options.level_adjustment*100)%</td>
+                    <td class="adjValue">$("%.1f" % (options.level_adjustment*100))%</td>
                 </tr>
             $for name, adj in level_adjustments.items():
                 $if abs(adj-1) > 0.001:
                     <tr>
                         <td>$name</td>
-                        <td class="adjValue">$(adj*100)%</td>
+                        <td class="adjValue">$("%.1f" % (adj*100))%</td>
                     </tr>
             <tr>
                 <th>Total</th>
-                <th class="adjValue">$(level_adjustments.total_adjustment()*100)%</th>
+                <th class="adjValue">$("%.1f" % (level_adjustments.total_adjustment()*100))%</th>
             </tr>
-        </table>
+    </table>
 </div>
 <div id="stationsdiv">
 

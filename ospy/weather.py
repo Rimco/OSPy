@@ -140,11 +140,15 @@ class _Weather(Thread):
 
     @staticmethod
     def _get_stormglass_json(url):
-        logging.debug(url)
-        request = Request(url)
-        request.add_header('Authorization', options.stormglass_key)
-        data = urlopen(request)
-        return json.loads(data.read().decode(data.info().get_content_charset('utf-8')))
+        try:
+            logging.debug(url)
+            request = Request(url)
+            request.add_header('Authorization', options.stormglass_key)
+            data = urlopen(request)
+            return json.loads(data.read().decode(data.info().get_content_charset('utf-8')))
+        except Exception as err:
+            logging.error('Stormglass failed:\n' + traceback.format_exc())
+            return {}
 
     @_cache('stormglass_data')
     def _get_stormglass_data(self, check_date):

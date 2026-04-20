@@ -6,6 +6,7 @@ __author__ = 'Rimco'
 # System imports
 import logging
 import traceback
+from ospy import version
 from ospy.helpers import is_python2, avg
 
 if is_python2():
@@ -115,8 +116,12 @@ class _Weather(Thread):
 
     def _find_location(self):
         if options.location and options.stormglass_key:
-            data = urlopen(
-                "https://nominatim.openstreetmap.org/search?q=%s&format=json" % quote_plus(options.location))
+            headers = {
+                "User-Agent": "OSPy/" + version.ver_str,
+                "Accept": "application/json"
+            }
+            request = Request("https://nominatim.openstreetmap.org/search?q=%s&format=json" % quote_plus(options.location), headers=headers)
+            data = urlopen(request)
             data = json.loads(data.read().decode(data.info().get_content_charset('utf-8')))
             if not data:
                 raise Exception('No location found: ' + options.location + '.')
